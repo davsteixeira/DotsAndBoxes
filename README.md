@@ -11,15 +11,15 @@
   - O cliente poderá realizar cadastro e visualizar o ranking através do cliente. 
 
 ## - Pontuação: 
-  (2 pontos): O jogo permite que dois jogadores disputem uma partida até o final.
-  (3 pontos): Múltiplas partidas podem ocorrer ao mesmo tempo.
-  (1 ponto): Persistência do ranking (arquivo ou banco de dados) e consulta do ranking através do cliente.
-  (2 ponto): O jogador poderá ingressar novamente na fila após uma partida sem necessitar fechamento do cliente ou servidor
-  (2 ponto): Correta utilização do padrão publish-subscribe e orientação a objetos
+  - (2 pontos): O jogo permite que dois jogadores disputem uma partida até o final.
+  - (3 pontos): Múltiplas partidas podem ocorrer ao mesmo tempo.
+  - (1 ponto): Persistência do ranking (arquivo ou banco de dados) e consulta do ranking através do cliente.
+  - (2 ponto): O jogador poderá ingressar novamente na fila após uma partida sem necessitar fechamento do cliente ou servidor
+  - (2 ponto): Correta utilização do padrão publish-subscribe e orientação a objetos
 
 ## - Pontos extras: 
-  (1 ponto): Suporte a partida entre 3x jogadores (mesma sessão)
-  (1 ponto): Interface gráfica para o cliente (Python; pygame)
-  (1 ponto): Ofuscação/criptografia do protocolo ou "anti-hack"
+  - (1 ponto): Suporte a partida entre 3x jogadores (mesma sessão)
+  - (1 ponto): Interface gráfica para o cliente (Python; pygame)
+  - (1 ponto): Ofuscação/criptografia do protocolo ou "anti-hack"
 
 ## - Entregáveis: Código-fonte do cliente e servidor (ambos em Python), descrição do protocolo criado (mensagens) e tutorial de como instalar/executar as aplicações.
