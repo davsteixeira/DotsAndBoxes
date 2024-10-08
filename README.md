@@ -1,8 +1,8 @@
 # DotsAndBoxes
 
 ## - Enunciado: Implementar o jogo Dots and Boxes, EM QUINTETOS, com suporte a partidas online. Mais informaçẽs sobre o jogo podem ser obtidas em nos seguinte links:
-  https://en.wikipedia.org/wiki/Dots_and_boxes
-  https://mathforlove.com/lesson/dots-and-boxes-game/
+  - https://en.wikipedia.org/wiki/Dots_and_boxes
+  - https://mathforlove.com/lesson/dots-and-boxes-game/
   
 ## - Especificação: Deverão ser criadas duas aplicações: um cliente e um servidor. 
   - O cliente deverá conectar no servidor (através do endereço IP e porta), autenticando e posteriormente solicitando ingressar em uma partida. 
