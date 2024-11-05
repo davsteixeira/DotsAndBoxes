@@ -17,9 +17,47 @@ class Tabuleiro:
     def connect(self, x, y, z ,w):
         pa = self.get_num(x, y)
         pb = self.get_num(z, w)
-        print(pa, pb)
+        #print(pa, pb)
         self._con[pa][pb] = "O"
         self._con[pb][pa] = "O"
+
+    def verifica_quadrados(self):
+        for i in range(self._x -1):
+            for j in range(self._y -1):
+                
+                cons = 0
+
+                # esq-cima e dir-cima
+                ni = self.get_num(i, j)
+                nj = self.get_num(i + 1, j)
+
+                if self._con[ni][nj] == 'O':
+                    cons = cons + 1
+
+                # dir-cima e dir-baixo
+                ni = self.get_num(i + 1, j)
+                nj = self.get_num(i + 1, j + 1)
+                
+                if self._con[ni][nj] == 'O':
+                    cons = cons + 1
+
+                # dir-baixo e esq-baixo
+                ni = self.get_num(i + 1, j + 1)
+                nj = self.get_num(i, j + 1)
+                
+                if self._con[ni][nj] == 'O':
+                    cons = cons + 1
+
+                # esq-baixo e esq-cima
+                ni = self.get_num(i, j + 1)
+                nj = self.get_num(i, j)
+                
+                if self._con[ni][nj] == 'O':
+                    cons = cons + 1
+
+                if cons == 4:
+                    print(f"({i}, {j}), ({i+1}, {j}), " +
+                          f"({i+1}, {j+1}), ({i}, {j+1})")
 
     def mostra_tabuleiro(self):
 
@@ -27,6 +65,7 @@ class Tabuleiro:
 
         while(linha != self._y):
 
+            #########
             for i in range(self._x -2):
 
                 pa = self.get_num(linha, i)
@@ -40,6 +79,8 @@ class Tabuleiro:
                 else:
                     print(".  ", end="")
             print('.')
+
+            #########
             for i in range(self._x -1):
 
                 pa = self.get_num(linha, i)
