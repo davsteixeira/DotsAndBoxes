@@ -113,7 +113,10 @@ class Tabuleiro:
             self.active_address()
 
             self.mostra_tabuleiro()
-
+            
+            if self._moves == 0:
+                    break
+            
             try:
                 pta, ptb = self.read_play()
             except (ValueError, IndexError):
@@ -126,10 +129,6 @@ class Tabuleiro:
                 pass
 
             if self.verifica_quadrados() == "point":
-
-                if self._moves == 0:
-                    break
-                
                 continue
             else:
                 pass

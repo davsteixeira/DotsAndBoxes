@@ -2,6 +2,7 @@ import socket
 from watchdog import Watchdog
 from tabuleiro import Tabuleiro
 
+#"localhost" deve ser mudado para o endereço de ip da maquina do servidor
 localIP = "localhost"
 localPort = 1111
 bufferSize = 1024
@@ -11,8 +12,8 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 timeout = 60
 wd = Watchdog(timeout)
 
-lin_tab = 5
-col_tab = 4
+lin_tab = 3
+col_tab = 2
 
 fila_espera = []
 addresses = []
@@ -70,7 +71,10 @@ def main():
     UDPServerSocket.sendto(str.encode("Jogo Ininicando...\n"), addresses[0])
     UDPServerSocket.sendto(str.encode("Jogo Ininicando...\n"), addresses[1])
 
+    print(addresses)
     winner = tab.game()
+    
+    #winner = addresses[0]
 
     winner_name : str
 
