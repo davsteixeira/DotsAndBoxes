@@ -20,7 +20,6 @@ def menu(nick):
         case "1":
             msg = "1:" + nick
             skt.sendto(msg.encode(), (SERVER_HOST, SERVER_PORT))
-            print((SERVER_HOST, SERVER_PORT))
         case "2":
             msg = "2:send_scoreboard"
             skt.sendto(msg.encode(), (SERVER_HOST, SERVER_PORT))
