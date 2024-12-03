@@ -1,8 +1,8 @@
 import socket
+import threading
 from watchdog import Watchdog
 from tabuleiro import Tabuleiro
 
-#"localhost" deve ser mudado para o endereço de ip da maquina do servidor
 localIP = "localhost"
 localPort = 1111
 bufferSize = 1024
@@ -12,8 +12,8 @@ UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 timeout = 60
 wd = Watchdog(timeout)
 
-lin_tab = 3
-col_tab = 2
+lin_tab = 5
+col_tab = 4
 
 fila_espera = []
 addresses = []
@@ -23,103 +23,27 @@ play_again_names = []
 
 win_award_points: int = 3
 
-def add_fila(msg, addr : tuple):
-
-    fila_espera.append(msg)
-    addresses.append(addr)
-    print(f"Jogador \"{msg}\", do endereço {addr} foi adicionado a fila de espera")
-
-def main():
-    fila_espera.clear()
-    addresses.clear()
-    for nomes in play_again_names:
-        fila_espera.append(nomes)
-    for enderecos in play_again_addresses:
-        addresses.append(enderecos)
+# Dicionário para armazenar as partidas ativas
+active_games = {}
+game_id_counter = 0
 
 
-    while len(fila_espera) < 2:
 
-        print(f"A fila de espera possui {len(fila_espera)} jogadores")
-        print("Aguardando conexão de jogadores ...")
+def add_fila(nome, endereco):
+    fila_espera.append(nome)
+    addresses.append(endereco)
+    print(f"Jogador {nome} entrou na fila de espera.")
 
-        send_all(f"Há {len(fila_espera)} jogador na fila, verificando entrada de novos jogadores...\n", addresses)
-
-        bytesAdressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAdressPair[0]
-        address = bytesAdressPair[1]
-
-        decodedmsg = message.decode()
-        data = decodedmsg.split(":")
-
-        if data[0] == "1":
-            add_fila(data[1], address)
-            send_msg("O jogo só iniciará com 2 jogador em espera!\n", address)
-        elif data[0] == "2":
-            read_db = open("scoreboard.txt", "r")
-            content_socoreboard = read_db.readlines()
-            for line in content_socoreboard:
-                send_msg(line,address)
-            send_msg("scoreboard_end",address)
-
-    tab = Tabuleiro(lin_tab, col_tab)
-
-    tab.addresses_management(addresses[0],addresses[1])
-    wd.set_addresses(addresses[0],addresses[1])
-    wd.set_names(fila_espera[0],fila_espera[1])
-
-    UDPServerSocket.sendto(str.encode("Jogo Ininicando...\n"), addresses[0])
-    UDPServerSocket.sendto(str.encode("Jogo Ininicando...\n"), addresses[1])
-
-    print(addresses)
-    winner = tab.game()
-    
-    #winner = addresses[0]
-
-    winner_name : str
-
-    if winner == addresses[0]:
-        winner_name = fila_espera[0]
-    elif winner == addresses[1]:
-        winner_name = fila_espera[1]
-    else:
-        winner_name = "draw"
-
-    if winner_name != "draw":
-        try:
-            create_db = open("scoreboard.txt", "x")
-            print("New scoreboard created!")
-        except FileExistsError:
-            pass
-        edit_db = open("scoreboard.txt", "a")
-        read_db = open("scoreboard.txt", "r")
-        content = read_db.readlines()
-        content_line = -1
-        i = -1
-        for line in content:
-            i += 1
-            content_data = content[i].split(" : ")
-            if content_data[0] == winner:
-                content_line = i
-                final_points = int(content_data[1]) + win_award_points
-                content[i] = f"{winner} : {final_points}\n"
-                rewrite_db = open("scoreboard.txt", "w")
-                rewrite_db.writelines(content)
-                rewrite_db.close()
-                break
-        if content_line == -1:
-            edit_db.write(f"{winner} : {win_award_points}\n")
-        read_db.close()
-        edit_db.close()
-
-def send_all(msg,players_addr):
-    for addr in players_addr:
-        UDPServerSocket.sendto(str.encode(msg), addr)
 
 def send_msg(msg, address):
     UDPServerSocket.sendto(str.encode(msg), address)
 
-def recieve_msg(cod, address):
+
+def send_all(msg, address_list):
+    for addr in address_list:
+        send_msg(msg, addr)
+
+def receive_msg(cod, address):
     UDPServerSocket.sendto(str.encode(cod), address)
 
     wd.start()
@@ -145,27 +69,107 @@ def recieve_msg(cod, address):
     
     return send_resposta
 
-def play_again():
-    j = 0
-    for i in addresses:
-        send_msg("play_again", addresses[j])
-        bytesAdressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAdressPair[0]
 
-        if message.decode() == "play_again_positive":
-            play_again_addresses.append(addresses[j])
-            play_again_names.append(fila_espera[j])
-        elif message.decode() == "play_again_negative":
-            send_msg("terminate", addresses[j])
-        j += 1
+def update_scoreboard(winner_name):
+    # Lógica para atualizar o placar do vencedor
+    with open("scoreboard.txt", "a") as file:
+        file.write(f"{winner_name} - {win_award_points} pontos\n")
 
 
-if __name__ == '__main__':
-    UDPServerSocket.bind((localIP, localPort))
+def handle_rematch(game_id):
+    # Lógica para permitir o rematch ou encerrar a partida
+    pass
+
+
+def run_game(addresses, names):
+    global game_id_counter
+    # Gerar um ID único para a partida
+    game_id = game_id_counter
+    game_id_counter += 1
+
+    # Criar uma instância de Tabuleiro para essa partida
+    tab = Tabuleiro(lin_tab, col_tab)
+    
+    # Registrar jogadores e seus endereços na partida
+    tab.addresses_management(addresses[0], addresses[1])
+    wd.set_addresses(addresses[0], addresses[1])
+    wd.set_names(names[0], names[1])
+
+    active_games[game_id] = {
+        'tab': tab,
+        'players': addresses,
+        'names': names,
+        'status': 'in_progress'
+    }
+
+    # Enviar mensagem para os jogadores
+    UDPServerSocket.sendto(str.encode("Jogo Iniciando...\n"), addresses[0])
+    UDPServerSocket.sendto(str.encode("Jogo Iniciando...\n"), addresses[1])
+
+    winner = tab.game()
+
+    winner_name = "draw"  # Default
+    if winner == addresses[0]:
+        winner_name = names[0]
+    elif winner == addresses[1]:
+        winner_name = names[1]
+
+    # Atualizar o placar se houver vencedor
+    if winner_name != "draw":
+        update_scoreboard(winner_name)
+
+    # Adicionar lógica para permitir que a partida seja jogada novamente, se necessário
+    handle_rematch(game_id)
+
+
+def main():
+    global fila_espera, addresses, play_again_addresses, play_again_names
+
     while True:
-        main()
+        # Adiciona jogadores na fila de espera
+        while len(fila_espera) < 2:
+            print(f"A fila de espera possui {len(fila_espera)} jogadores")
+            print("Aguardando conexão de jogadores ...")
 
-        send_all("Esperando decisão de rematch de todos jogadores...\n",addresses)
-        play_again()
-        if len(play_again_addresses) == 0:
-            break
+            # Envia mensagem de status da fila para jogadores em espera
+            send_all(f"Há {len(fila_espera)} jogador(s) na fila, verificando entrada de novos jogadores...\n", addresses)
+
+            # Espera por uma nova mensagem do cliente
+            bytesAdressPair = UDPServerSocket.recvfrom(bufferSize)
+            message = bytesAdressPair[0]
+            address = bytesAdressPair[1]
+            decodedmsg = message.decode()
+            data = decodedmsg.split(":")
+
+            if data[0] == "1":
+                add_fila(data[1], address)
+                send_msg("O jogo só iniciará com 2 jogadores em espera!\n", address)
+            elif data[0] == "2":
+                read_db = open("scoreboard.txt", "r")
+                content_socoreboard = read_db.readlines()
+                for line in content_socoreboard:
+                    send_msg(line, address)
+                send_msg("scoreboard_end", address)
+
+        # Quando 2 jogadores entram na fila, cria-se uma nova thread para o jogo
+        addresses_pair = addresses[:2]  # Pega os dois primeiros jogadores
+        names_pair = fila_espera[:2]
+
+        # Inicia a thread para o jogo
+        game_thread = threading.Thread(target=run_game, args=(addresses_pair, names_pair))
+        game_thread.start()
+
+        # Remove os jogadores da fila de espera
+        fila_espera = fila_espera[2:]
+        addresses = addresses[2:]
+
+        # O servidor continua ouvindo novas conexões
+
+
+
+
+if __name__ == "__main__":
+    UDPServerSocket.bind((localIP, localPort))
+    print(f"Servidor iniciado em {localIP}:{localPort}")
+    main()
+

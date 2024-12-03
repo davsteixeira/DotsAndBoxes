@@ -57,10 +57,10 @@ class Tabuleiro:
 
 
     def read_play(self):
-        from server import recieve_msg
+        from server import receive_msg
 
-        pa = recieve_msg("pa", self._send_address)
-        pb = recieve_msg("pb",self._send_address)
+        pa = receive_msg("pa", self._send_address)
+        pb = receive_msg("pb",self._send_address)
 
         av = pa.split(" ")
         ax, ay = int(av[0]), int(av[1])
