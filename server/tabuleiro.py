@@ -279,7 +279,6 @@ class Tabuleiro:
         else:
             send_msg((T_BGREEN + f"| P2      - {self._player2_points : 04d} |" + T_RESET + "\n"), self._send_address)
         self._moves = counter
-        print(self._moves)
 
     def __str__(self):
         ss = ""
